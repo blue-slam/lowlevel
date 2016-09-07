@@ -1,4 +1,4 @@
-name: blue_slam
+name: 'blue_slam'
 geometry:
   l: 0.0
   r: 0.067
@@ -13,16 +13,17 @@ battery:
 motors:
   # True Gear Ratio (22×20×22×22×23) / (12×12×10×10×10) ~= 34.014
   gear_ratio: 34.014
-  encoder_ratio: 12.0
+  encoder_ratio: 48
   max_rpm: 290
   min_volts: 0.0
   max_volts: 12.0
+  max_cmd: 400
 controller:
+  root_topic: '/robot'
   leds: 3
   buttons: 3
   notes: 16
-  cmd_mag: 400
-  motor_sample_rate: 50.0
+  supervise_rate: 50.0
   button_sample_rate: 4.0
   battery_sample_rate: 0.2
 

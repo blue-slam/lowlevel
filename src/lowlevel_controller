@@ -1,255 +1,26 @@
 #!/usr/bin/env python
 
 import yaml
-import numpy as np
-
 import rospy
 
-from std_msgs.msg import Byte
-from std_msgs.msg import Empty
-from std_msgs.msg import String
-from sensor_msgs.msg import BatteryState
-from lowlevel.msg import Buttons
-from lowlevel.msg import MotorPosition
-from lowlevel.msg import MotorRate
-from lowlevel.msg import MotorCmd
-
-from lowlevel_interface import Interface
-
-robot = None
-battery_state_pub = None
-buttons_pub = None
-motor_rate_pub = None
-
-motor_cmd_sub = None
-position_reset_sub = None
-yellow_led_sub = None
-green_led_sub = None
-red_led_sub = None
-buzzer_sub = None
-
-gear_ratio = 0.0
-encoder_ratio = 0
-motor_rpm = 0
-min_motor_volts = 0
-max_motor_volts = 0
-max_cmd = 0
-battery_design_capacity = 0
-battery_serial_number = ''
-kv = 0
-ku = 0
-
-
-def battery_handler():
-    global robot
-    global battery_state_pub
-    global ku
-    global max_cmd
-    global battery_design_capacity
-    global battery_serial_number
-
-    while True:
-        try:
-            cell_count, battery_millivolts, low_voltage_cutoff = robot.get_battery_state()
-            low_voltage_cutoff /= 1000.0
-
-            battery_state = BatteryState()
-            battery_state.header.stamp = rospy.Time.now()
-            battery_state.voltage = battery_millivolts / 1000.0
-            battery_state.current = float('nan')
-            battery_state.charge = float('nan')
-            battery_state.capacity = float('nan')
-            battery_state.design_capacity = battery_design_capacity
-            battery_state.power_supply_technology = BatteryState.POWER_SUPPLY_TECHNOLOGY_LIPO
-            if cell_count > 0:
-                battery_state.present = True
-                battery_state.percentage = (battery_state.voltage - low_voltage_cutoff) / \
-                                           ((cell_count * 4.2) - low_voltage_cutoff)
-                battery_state.power_supply_status = BatteryState.POWER_SUPPLY_STATUS_DISCHARGING
-                battery_state.power_supply_health = BatteryState.POWER_SUPPLY_HEALTH_GOOD
-                battery_state.cell_voltage = [battery_state.voltage / cell_count for _ in range(0, cell_count)]
-                battery_state.location = '0'
-                battery_state.serial_number = battery_serial_number
-                ku = max_cmd / battery_state.voltage
-
-            else:
-                battery_state.present = False
-                battery_state.percentage = 0.0
-                battery_state.power_supply_health = BatteryState.POWER_SUPPLY_HEALTH_UNKNOWN
-                battery_state.power_supply_status = BatteryState.POWER_SUPPLY_STATUS_UNKNOWN
-                battery_state.location = ''
-                battery_state.serial_number = ''
-                ku = 0
-
-            battery_state_pub.publish(battery_state)
-            return
-
-        except IOError:
-            print('battery: IOError')
-
-
-def buttons_handler():
-    global robot
-    global buttons_pub
-
-    try:
-        button_a, button_b, button_c = robot.is_button_pushed()
-        if button_a or button_b or button_c:
-            buttons_msg = Buttons()
-            buttons_msg.header.stamp = rospy.Time.now()
-            buttons_msg.button_a = button_a
-            buttons_msg.button_b = button_b
-            buttons_msg.button_c = button_c
-            buttons_pub.publish(buttons_msg)
-    except IOError:
-        print('button: IOError')
-
-
-def motor_cmd_handler(msg):
-    global robot
-    global kv
-    global ku
-
-    while True:
-        try:
-            motor_rates = np.array([[msg.left_motor], [msg.right_motor]])
-            u = ku * ((motor_rates * kv) + (np.sign(motor_rates) * min_motor_volts))
-            robot.set_motor_speeds(u[0, 0], u[1, 0])
-            return
-        except IOError:
-            print('motor_cmd: IOError')
-
-
-def position_reset_handler(msg):
-    global robot
-    while True:
-        try:
-            robot.clear_motor_counts()
-            return
-        except IOError:
-            print('position_reset: IOERROR')
-
-
-def yellow_led_handler(msg):
-    global robot
-
-    while True:
-        try:
-            robot.set_yellow_led(msg.data != 0)
-            return
-        except IOError:
-            print('yellow_led: IOError')
-
-
-def green_led_handler(msg):
-    global robot
-
-    while True:
-        try:
-            robot.set_green_led(msg.data != 0)
-            return
-        except IOError:
-            print('green_led: IOError')
-
-
-def red_led_handler(msg):
-    global robot
-
-    while True:
-        try:
-            robot.set_red_led(msg.data != 0)
-            return
-        except IOError:
-            print('red_led: IOError')
-
-
-def buzzer_handler(msg):
-    global robot
-
-    while True:
-        try:
-            robot.play_notes(msg.data)
-            return
-        except IOError:
-            print('buzzer: IOError')
+from controller import AStar
 
 if __name__ == "__main__":
     try:
-        rospy.init_node('mip_rover_controller')
-
-        robot = Interface()
+        rospy.init_node('lowlevel_controller')
 
         params = None
         param_path = rospy.get_param('~lowlevel_config_path')
         with open(param_path, 'r') as f:
             params = yaml.load(f.read())
-        rospy.set_param('/robot', params)
+        rospy.set_param(params['controller']['root_topic'], params)
 
-        gear_ratio = params['motors']['gear_ratio']
-        encoder_ratio = params['motors']['encoder_ratio']
-        motor_rpm = params['motors']['max_rpm']
-        min_motor_volts = params['motors']['min_volts']
-        max_motor_volts = params['motors']['max_volts']
-        max_cmd = params['controller']['cmd_mag']
-        sample_rate = params['controller']['motor_sample_rate']
-        button_sample_rate = params['controller']['button_sample_rate']
-        battery_sample_rate = params['controller']['battery_sample_rate']
-        battery_design_capacity = params['battery']['design_capacity']
-        battery_serial_number = params['battery']['serial_number']
-
-        kv = (30 * (max_motor_volts - min_motor_volts)) / (motor_rpm * np.pi)
-
-        battery_state_pub = rospy.Publisher('/robot/battery', BatteryState, queue_size=10, latch=True)
-        buttons_pub = rospy.Publisher('/robot/buttons', Buttons, queue_size=10)
-        motor_position_pub = rospy.Publisher('/robot/motors/position', MotorPosition, queue_size=10)
-        motor_rate_pub = rospy.Publisher('/robot/motors/rate', MotorRate, queue_size=10)
-
-        motor_cmd_sub = rospy.Subscriber('/robot/motors/cmd', MotorCmd, motor_cmd_handler)
-        position_reset_sub = rospy.Subscriber('/robot/motors/reset', Empty, position_reset_handler)
-        yellow_led_sub = rospy.Subscriber('/robot/leds/yellow', Byte, yellow_led_handler)
-        green_led_sub = rospy.Subscriber('/robot/leds/green', Byte, green_led_handler)
-        red_led_sub = rospy.Subscriber('/robot/leds/red', Byte, red_led_handler)
-        buzzer_sub = rospy.Subscriber('/robot/buzzer', String, buzzer_handler)
-
-        rate = rospy.Rate(sample_rate)
-        button_rate = rospy.Rate(button_sample_rate)
-        battery_rate = rospy.Rate(battery_sample_rate)
-
-        motor_position = MotorPosition()
-        motor_rate = MotorRate()
-        position = np.zeros([4, 1])
-        position_scale = (2 * np.pi) / (gear_ratio * encoder_ratio)
-
-        robot.clear_motor_counts()
-        d = rospy.Duration()
-
+        robot = AStar(params)
+        rate = rospy.Rate(params['controller']['supervise_rate'])
         while not rospy.is_shutdown():
-            try:
-                position[0, 0], position[1, 0], position[2, 0], position[3, 0] = robot.get_motor_state()
-                position *= position_scale
-
-                motor_position.header.stamp = rospy.Time.now()
-                motor_position.left_motor_position = position[0, 0]
-                motor_position.right_motor_position = position[1, 0]
-                motor_position_pub.publish(motor_position)
-
-                motor_rate.header.stamp = rospy.Time.now()
-                motor_rate.left_motor_rate = position[2, 0] * 50
-                motor_rate.right_motor_rate = position[3, 0] * 50
-                motor_rate_pub.publish(motor_rate)
-
-                if button_rate.remaining().to_sec() <= 0.0:
-                    buttons_handler()
-                    button_rate.last_time = rospy.rostime.get_rostime()
-
-                if battery_rate.remaining().to_sec() <= 0.0:
-                    battery_handler()
-                    battery_rate.last_time = rospy.rostime.get_rostime()
-
-            except IOError:
-                print('motor_position/motor_rate: IOError')
-
+            robot.supervise()
             rate.sleep()
+        robot.shutdown()
 
     except rospy.ROSInterruptException:
         pass

@@ -1,3 +1,3 @@
 Header header
-float32 left_motor_position
-float32 right_motor_position
+int32 left_count
+int32 right_count

@@ -50,7 +50,6 @@ add_message_files(
    FILES
    Buttons.msg
    MotorCmd.msg
-   MotorRate.msg
    MotorPosition.msg
 )
 

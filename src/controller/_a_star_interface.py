@@ -23,7 +23,7 @@ PLAY_NOTES_ADDR = 28
 NOTES_ADDR = 29
 
 
-class Interface:
+class AStarInterface:
     def __init__(self):
         self._bus = smbus.SMBus(1)
         self._i2c_addr = I2C_ADDR
