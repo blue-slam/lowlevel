@@ -37,7 +37,7 @@ class AStar:
 
         self._battery_state_pub = rospy.Publisher(root_topic + '/battery', BatteryState, queue_size=10, latch=True)
         self._buttons_pub = rospy.Publisher(root_topic + '/buttons', Buttons, queue_size=10)
-        self._motor_position_pub = rospy.Publisher(root_topic + '/motors/position', MotorPosition, queue_size=10)
+        self._motor_position_pub = rospy.Publisher(root_topic + '/motors/position', MotorPosition, queue_size=10, latch=True)
 
         self._motor_cmd_sub = rospy.Subscriber(root_topic + '/motors/cmd', MotorCmd, self._motor_cmd_handler)
         self._position_reset_sub = rospy.Subscriber(root_topic + '/motors/reset', Empty, self._position_reset_handler)
@@ -72,7 +72,7 @@ class AStar:
         with self._lock:
             self._buzzer_notes = msg.data
 
-    def _position_reset_handler(self):
+    def _position_reset_handler(self, msg):
         with self._lock:
             self._position_reset = True
 
@@ -87,6 +87,7 @@ class AStar:
                 try:
                     self._interface.clear_motor_counts()
                     self._position_reset = False
+                    break;
                 except IOError:
                     print('position_reset: IOERROR')
 
@@ -98,13 +99,13 @@ class AStar:
 
     def _publish_position(self):
         try:
-            left_count, right_count = self._interface.get_motor_rates()
+            left_count, right_count = self._interface.get_motor_counts()
+            self._motor_position.header.stamp = rospy.get_rostime()
             self._motor_position.left_count = left_count
             self._motor_position.right_count = right_count
+            self._motor_position_pub.publish(self._motor_position)
         except IOError:
             print('position: IOError')
-        finally:
-            self._motor_position_pub.publish(self._motor_position)
 
     def _publish_button_state(self):
         if self._button_rate.remaining().to_sec() <= 0.0:

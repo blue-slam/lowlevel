@@ -60,7 +60,7 @@ class AStarInterface:
         self.write_pack(RED_LED_ADDR, 'B', on)
 
     def play_notes(self, notes):
-        self.write_pack(PLAY_NOTES_ADDR, 'B17s', 1, notes.encode("ascii"))
+        self.write_pack(PLAY_NOTES_ADDR, 'B16s', True, notes.encode("ascii"))
 
     def set_motor_speeds(self, left, right):
         self.write_pack(LEFT_MOTOR_ADDR, '<hh', left, right)
