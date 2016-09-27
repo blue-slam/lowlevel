@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-
-<launch>
-  <node pkg="lowlevel" type="lowlevel_controller" name="lowlevel_controller" respawn="true" output="screen">
-    <param name="lowlevel_config_path" value="$(find lowlevel)/params/lowlevel_config.yaml" />
-  </node>
-</launch>

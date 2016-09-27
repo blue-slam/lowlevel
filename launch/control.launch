@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+    <node pkg="lowlevel" type="robot_controller" name="robot_controller" respawn="true" output="screen">
+        <remap from="/states/motors" to="/joint_states"/>
+        <remap from="/commands/motors" to="/joint_cmds"/>
+        <param name="robot_config_path" value="$(find lowlevel)/params/robot_config.yaml" />
+    </node>
+</launch>

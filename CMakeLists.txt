@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   sensor_msgs
   std_msgs
+  control_msgs
   message_generation
 )
 
@@ -49,8 +50,6 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
    FILES
    Buttons.msg
-   MotorCmd.msg
-   MotorPosition.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -70,8 +69,9 @@ add_message_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-#  geometry_msgs
-#  sensor_msgs
+  geometry_msgs
+  sensor_msgs
+  control_msgs
   std_msgs
 )
 
