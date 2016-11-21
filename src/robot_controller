@@ -7,16 +7,11 @@ from controller import BlueSlam
 
 if __name__ == "__main__":
     try:
-        rospy.init_node('blueslam_controller')
+        rospy.init_node('blue_slam_controller')
 
-        params = None
-        param_path = rospy.get_param('~robot_config_path')
-        with open(param_path, 'r') as f:
-            params = yaml.load(f.read())
-        rospy.set_param(params['robot_name'], params)
-
-        robot = BlueSlam(params)
-        rate = rospy.Rate(params['controller']['update_rate'])
+        robot_name = rospy.get_param('~robot_name')
+        robot = BlueSlam(robot_name)
+        rate = rospy.Rate(rospy.get_param(robot_name + '/controller/update_rate'))
         while not rospy.is_shutdown():
             robot.update(rospy.get_rostime(), rate)
             rate.sleep()

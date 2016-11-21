@@ -10,28 +10,27 @@ from lowlevel.msg import Buttons
 from control_msgs.msg import JointCommand
 from sensor_msgs.msg import JointState
 
-
 class BlueSlam:
 
-    def __init__(self, params):
+    def __init__(self, robot_name):
 
         self._lock = Lock()
         self._interface = AStarInterface()
 
-        self._battery_design_capacity = params['battery']['design_capacity']
-        self._battery_serial_number = params['battery']['serial_number']
+        self._battery_design_capacity = rospy.get_param(robot_name + '/battery/design_capacity')
+        self._battery_serial_number = rospy.get_param(robot_name + '/battery/serial_number')
 
-        self._gear_ratio = params['motors']['gear_ratio']
-        self._encoder_ratio = params['motors']['encoder_ratio']
-        self._max_cmd = params['motors']['max_cmd']
-        self._max_rpm = params['motors']['max_rpm']
-        self._max_volts = params['motors']['max_volts']
-        self._min_volts = params['motors']['min_volts']
-        self._r = params['geometry']['r']
-        self._d = params['geometry']['d']
-        self._kp = params['motors']['kp']
-        self._ki = params['motors']['ki']
-        self._kd = params['motors']['kd']
+        self._gear_ratio = rospy.get_param(robot_name + '/motors/gear_ratio')
+        self._encoder_ratio = rospy.get_param(robot_name + '/motors/encoder_ratio')
+        self._max_cmd = rospy.get_param(robot_name + '/motors/max_cmd')
+        self._max_rpm = rospy.get_param(robot_name + '/motors/max_rpm')
+        self._max_volts = rospy.get_param(robot_name + '/motors/max_volts')
+        self._min_volts = rospy.get_param(robot_name + '/motors/min_volts')
+        self._r = rospy.get_param(robot_name + '/geometry/r')
+        self._d = rospy.get_param(robot_name + '/geometry/d')
+        self._kp = rospy.get_param(robot_name + '/motors/kp')
+        self._ki = rospy.get_param(robot_name + '/motors/ki')
+        self._kd = rospy.get_param(robot_name + '/motors/kd')
 
         self._ku = 0
         self._kv = (30 * (self._max_volts - self._min_volts)) / (self._max_rpm * np.pi)
@@ -39,14 +38,14 @@ class BlueSlam:
 
         self._last_wheel_stamp = rospy.get_rostime()
         self._joint_state = JointState()
-        self._joint_state.name = ['left_motor_joint', 'right_motor_joint', 'castor_joint', 'castor_wheel_joint']
+        self._joint_state.name = ['left_motor_to_left_motor_output_shaft_joint', 'right_motor_to_right_motor_output_shaft_joint', 'castor_backet_to_castor_joint', 'castor_to_castor_wheel_joint']
         self._joint_state.position = [0.0, 0.0, 0.0, 0.0]
         self._joint_state.velocity = [0.0, 0.0, 0.0, 0.0]
         self._measured_wheel_vel = np.zeros([2, 1])
         self._measured_wheel_pos = np.zeros([2, 1])
         self._ready = 0
 
-        self._last_drive_stamp = rospy.get_rostime()
+        self._last_joint_cmd_stamp = rospy.get_rostime()
         self._wheel_vel_des = np.zeros([2, 1])
         self._u = np.zeros([2, 1])
         self._error = np.zeros([2, 1])
@@ -75,8 +74,9 @@ class BlueSlam:
         self._red_sub = rospy.Subscriber('/commands/red', Byte, self._red_handler)
         self._buzzer_sub = rospy.Subscriber('/commands/buzzer', String, self._buzzer_handler)
 
-        self._button_rate = rospy.Rate(params['controller']['button_sample_rate'])
-        self._battery_rate = rospy.Rate(params['controller']['battery_sample_rate'])
+        self._button_rate = rospy.Rate(rospy.get_param(robot_name + '/controller/button_sample_rate'))
+        self._battery_rate = rospy.Rate(rospy.get_param(robot_name + '/controller/battery_sample_rate'))
+        self._cmd_timeout = rospy.get_param(robot_name + '/controller/cmd_timeout')
 
         self._interface.set_motor_speeds(self._u[0, 0], self._u[1, 0])
         self._interface.clear_motor_counts()
@@ -188,6 +188,7 @@ class BlueSlam:
 
     def _joint_cmd_handler(self, msg):
         with self._lock:
+            self._last_joint_cmd_stamp = rospy.get_rostime()
             self._wheel_vel_des[0, 0] = msg.velocity[0]
             self._wheel_vel_des[1, 0] = msg.velocity[1]
 
@@ -198,11 +199,13 @@ class BlueSlam:
 
             left_count, right_count = self._interface.get_motor_counts()
             new_position = np.array([[left_count], [right_count]]) * self._ke
+            # print('count: [{:f},{:f}] rad: [{:f},{:f}] dis: [{:f},{:f}]'.format(left_count, right_count, new_position[0, 0], new_position[1, 0], new_position[0, 0] * self._r, new_position[1, 0] * self._r))
 
             if dt > 0:
                 self._measured_wheel_vel = (new_position - self._measured_wheel_pos) / dt
                 self._measured_wheel_pos = new_position
 
+                self._joint_state.header.stamp = stamp
                 self._joint_state.position[0] = self._measured_wheel_pos[0]
                 self._joint_state.position[1] = self._measured_wheel_pos[1]
 
@@ -232,6 +235,11 @@ class BlueSlam:
                     integral[1, 0] = 0.0
                     if v[1, 0] == 0:
                         u[1, 0] = 0
+
+                if (stamp - self._last_joint_cmd_stamp).to_sec() > self._cmd_timeout:
+                    u = np.zeros([2, 1])
+                    error = np.zeros([2, 1])
+                    integral = np.zeros([2, 1])
 
                 self._u = u
                 self._error = error

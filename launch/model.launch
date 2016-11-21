@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="machine"/>
+    <param name="robot_description" command="cat $(find lowlevel)/urdf/blue-slam.urdf" />
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="blue_slam_state" machine="$(arg machine)" respawn="true" output="screen">
+        <remap from="/joint_states" to="/states/motors"/>
+        <param name="publish_frequency" value="50"/>
+    </node>
+</launch>

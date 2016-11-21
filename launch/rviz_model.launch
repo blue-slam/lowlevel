@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <include file="$(find platform)/launch/includes/machines.launch.xml"/>
+
+    <arg name="machine" value="host"/>
+
+    <param name="robot_description" command="cat $(find lowlevel)/urdf/blue-slam.urdf"/>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" machine="$(arg machine)" output="screen"/>
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="blue_slam_state" machine="$(arg machine)" output="screen"/>
+    <node pkg="rviz" type="rviz" name="blueslam_rviz" args="-d $(find lowlevel)/urdf/model.rviz" output="screen"/>
+
+</launch>

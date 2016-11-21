@@ -1,0 +1,572 @@
+<?xml version="1.0"?>
+
+<robot name="blue-slam">
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <box size="0.144 0.024 0.008"/>
+            </geometry>
+            <material name="metallic_blue">
+                <color rgba="0.75 0.75 1.0 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <link name="tail_bracket">
+        <visual>
+            <geometry>
+                <box size="0.048 0.024 0.002"/>
+            </geometry>
+            <material name="metallic_blue"/>
+        </visual>
+    </link>
+
+    <joint name="base_to_tail_bracket_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="tail_bracket"/>
+        <origin rpy="0.0 0.0 1.5707" xyz="0.0 -0.012 -0.005"/>
+    </joint>
+
+    <link name="tail_link">
+        <visual>
+            <geometry>
+                <box size="0.144 0.024 0.008"/>
+            </geometry>
+            <material name="metallic_blue"/>
+        </visual>
+    </link>
+
+    <joint name="tail_to_tail_bracket_joint" type="fixed">
+        <parent link="tail_bracket"/>
+        <child link="tail_link"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.078 0.0 0.005"/>
+    </joint>
+
+    <link name="back_left_standoff">
+        <visual>
+            <geometry>
+                <cylinder length=".050" radius="0.0025"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0.01 0.01 0.01 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="back_left_standoff_joint" type="fixed">
+        <parent link="tail_link"/>
+        <child link="back_left_standoff"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.048 -0.008 0.029"/>
+    </joint>
+
+    <link name="back_right_standoff">
+        <visual>
+            <geometry>
+                <cylinder length=".050" radius="0.0025"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0.01 0.01 0.01 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="back_right_standoff_joint" type="fixed">
+        <parent link="tail_link"/>
+        <child link="back_right_standoff"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.048 0.008 0.029"/>
+    </joint>
+
+    <link name="front_left_standoff">
+        <visual>
+            <geometry>
+                <cylinder length=".050" radius="0.0025"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0.01 0.01 0.01 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="front_left_standoff_joint" type="fixed">
+        <parent link="tail_link"/>
+        <child link="front_left_standoff"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.048 -0.008 0.029"/>
+    </joint>
+
+    <link name="front_right_standoff">
+        <visual>
+            <geometry>
+                <cylinder length=".050" radius="0.0025"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0.01 0.01 0.01 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="front_right_standoff_joint" type="fixed">
+        <parent link="tail_link"/>
+        <child link="front_right_standoff"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.048 0.008 0.029"/>
+    </joint>
+
+    <link name="castor_bracket">
+        <visual>
+            <geometry>
+                <box size="0.032 0.024 0.010"/>
+            </geometry>
+            <material name="metallic_blue"/>
+        </visual>
+    </link>
+
+    <joint name="tail_to_castor_bracket_joint" type="fixed">
+        <parent link="tail_link"/>
+        <child link="castor_bracket"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.072 0.0 -0.008"/>
+    </joint>
+
+    <link name="castor">
+        <visual>
+            <geometry>
+                <box size="0.0305 0.025 0.026"/>
+            </geometry>
+            <material name="silver">
+                <color rgba="0.75 0.75 .75 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="castor_joint" type="continuous">
+        <axis xyz="0 0 1"/>
+        <parent link="castor_bracket"/>
+        <child link="castor"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.01525 0.0 -0.018"/>
+    </joint>
+
+    <link name="castor_wheel">
+        <visual>
+            <geometry>
+                <cylinder length="0.012" radius="0.0125"/>
+            </geometry>
+            <material name="white">
+                <color rgba="1.0 1.0 1.0 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="castor_wheel_joint" type="continuous">
+        <axis xyz="0 0 1"/>
+        <parent link="castor"/>
+        <child link="castor_wheel"/>
+        <origin rpy="-1.5708 0 0" xyz="0.0 0.0 -0.013"/>
+    </joint>
+
+    <link name="top_tail_link">
+        <visual>
+            <geometry>
+                <box size="0.128 0.024 0.008"/>
+            </geometry>
+            <material name="metallic_blue"/>
+        </visual>
+    </link>
+
+    <joint name="top_tail_link_joint" type="fixed">
+        <parent link="tail_link"/>
+        <child link="top_tail_link"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.008 0.0 0.054"/>
+    </joint>
+
+    <link name="tail_base_plate">
+        <visual>
+            <geometry>
+                <box size="0.090 0.104 0.003"/>
+            </geometry>
+            <material name="acrylic">
+                <color rgba="1.0 1.0 1.0 0.75"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="tail_base_plate_joint" type="fixed">
+        <parent link="top_tail_link"/>
+        <child link="tail_base_plate"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.017 0.0 0.0055"/>
+    </joint>
+
+    <link name="angle_bracket_plate_1">
+        <visual>
+            <geometry>
+                <box size="0.026 0.024 0.002"/>
+            </geometry>
+            <material name="metallic_blue"/>
+        </visual>
+    </link>
+
+    <link name="angle_bracket_plate_2">
+        <visual>
+            <geometry>
+                <box size="0.024 0.024 0.002"/>
+            </geometry>
+            <material name="metallic_blue"/>
+        </visual>
+    </link>
+
+    <joint name="angle_bracket_joint" type="fixed">
+        <parent link="angle_bracket_plate_1"/>
+        <child link="angle_bracket_plate_2"/>
+        <origin rpy="0.0 1.5708 0.0" xyz="0.012 0.0 0.013"/>
+    </joint>
+
+    <joint name="tail_to_angle_bracket_joint" type="fixed">
+        <parent link="tail_link"/>
+        <child link="angle_bracket_plate_1"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.067 0.0 0.005"/>
+    </joint>
+
+     <link name="front_base_plate">
+        <visual>
+            <geometry>
+                <box size="0.090 0.104 0.003"/>
+            </geometry>
+            <material name="acrylic"/>
+        </visual>
+    </link>
+
+    <joint name="angle_brack_to_front_base_plate_joint" type="fixed">
+        <parent link="angle_bracket_plate_2"/>
+        <child link="front_base_plate"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.032 0.0 0.0025"/>
+    </joint>
+
+    <link name="left_motor_bracket">
+        <visual>
+            <geometry>
+                <box size="0.037 0.037 0.003"/>
+            </geometry>
+            <material name="metallic_blue"/>
+        </visual>
+    </link>
+
+    <joint name="base_to_left_motor_bracket_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="left_motor_bracket"/>
+        <origin rpy="0.0 -1.5708 0.0" xyz="-0.0735 0.0 -0.0145"/>
+    </joint>
+
+    <link name="right_motor_bracket">
+        <visual>
+            <geometry>
+                <box size="0.037 0.037 0.003"/>
+            </geometry>
+            <material name="metallic_blue"/>
+        </visual>
+    </link>
+
+    <joint name="base_to_right_motor_bracket_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="right_motor_bracket"/>
+        <origin rpy="0.0 -1.5708 0.0" xyz="0.0735 0.0 -0.0145"/>
+    </joint>
+
+    <link name="left_motor">
+        <visual>
+            <geometry>
+                <cylinder length="0.0635" radius="0.0125"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+    </link>
+
+    <link name="left_motor_output_shaft">
+        <visual>
+            <geometry>
+                <cylinder length="0.0125" radius="0.004"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+    </link>
+
+    <joint name="left_motor_joint" type="continuous">
+        <axis xyz="0 0 1"/>
+        <parent link="left_motor"/>
+        <child link="left_motor_output_shaft"/>
+        <origin rpy="0.0 0.0 1.5708" xyz="0.0 0.0 0.038"/>
+    </joint>
+
+    <link name="left_motor_shaft_connector">
+        <visual>
+            <geometry>
+                <cylinder length="0.005" radius="0.011"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+    </link>
+
+    <joint name="left_motor_shaft_connector_joint" type="fixed">
+        <parent link="left_motor_output_shaft"/>
+        <child link="left_motor_shaft_connector"/>
+        <origin rpy="0.0 0.0 1.5708" xyz="0.0 0.0 0.0"/>
+    </joint>
+
+    <link name="left_wheel">
+        <visual>
+            <geometry>
+                <cylinder length="0.008" radius="0.03525"/>
+            </geometry>
+            <material name="rubber">
+                <color rgba="0.25 0.25 0.25 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="left_wheel_connector_joint" type="fixed">
+        <parent link="left_motor_shaft_connector"/>
+        <child link="left_wheel"/>
+        <origin rpy="0.0 0.0 1.5708" xyz="0.0 0.0 0.00625"/>
+    </joint>
+
+    <joint name="bracket_to_left_motor_joint" type="fixed">
+        <parent link="left_motor_bracket"/>
+        <child link="left_motor"/>
+        <origin rpy="0.0 0.0 1.5708" xyz="-0.0065 0.0 -0.03325"/>
+    </joint>
+
+    <link name="right_motor">
+        <visual>
+            <geometry>
+                <cylinder length="0.0635" radius="0.0125"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+    </link>
+
+    <link name="right_motor_output_shaft">
+        <visual>
+            <geometry>
+                <cylinder length="0.0125" radius="0.004"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+    </link>
+
+    <joint name="right_motor_joint" type="continuous">
+        <axis xyz="0 0 1"/>
+        <parent link="right_motor"/>
+        <child link="right_motor_output_shaft"/>
+        <origin rpy="0.0 0.0 1.5708" xyz="0.0 0.0 -0.038"/>
+    </joint>
+
+    <link name="right_motor_shaft_connector">
+        <visual>
+            <geometry>
+                <cylinder length="0.005" radius="0.011"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+    </link>
+
+    <joint name="right_motor_shaft_connector_joint" type="fixed">
+        <parent link="right_motor_output_shaft"/>
+        <child link="right_motor_shaft_connector"/>
+        <origin rpy="0.0 0.0 1.5708" xyz="0.0 0.0 0.0"/>
+    </joint>
+
+    <link name="right_wheel">
+        <visual>
+            <geometry>
+                <cylinder length="0.008" radius="0.03525"/>
+            </geometry>
+            <material name="rubber">
+                <color rgba="0.25 0.25 0.25 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="right_wheel_connector_joint" type="fixed">
+        <parent link="right_motor_shaft_connector"/>
+        <child link="right_wheel"/>
+        <origin rpy="0.0 0.0 1.5708" xyz="0.0 0.0 -0.00625"/>
+    </joint>
+
+    <joint name="bracket_to_right_motor_joint" type="fixed">
+        <parent link="right_motor_bracket"/>
+        <child link="right_motor"/>
+        <origin rpy="0.0 0.0 -1.5708" xyz="-0.0065 0.0 0.03325"/>
+    </joint>
+
+    <link name="leddar_sensor">
+        <visual>
+            <geometry>
+                <box size="0.076 0.0329 0.114"/>
+            </geometry>
+            <material name="gray">
+                <color rgba="0.60 0.60 0.60 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="leddar_laser_to_front_base_plate_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="leddar_sensor"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.01045 0.062"/>
+    </joint>
+
+    <link name="leddar_lens">
+        <visual>
+            <geometry>
+                <cylinder length="0.036" radius="0.0155"/>
+            </geometry>
+            <material name="rubber"/>
+        </visual>
+    </link>
+
+    <joint name="leddar_sensor_to_lens_joint" type="fixed">
+        <parent link="leddar_sensor"/>
+        <child link="leddar_lens"/>
+        <origin rpy="-1.5708 0.0 0.0" xyz="0.0165 0.014 0.023"/>
+    </joint>
+
+    <link name="camera_mount_bracket_1">
+        <visual>
+            <geometry>
+                <box size="0.040 0.023 0.003"/>
+            </geometry>
+            <material name="acrylic_gray">
+                <color rgba="0.25 0.25 0.25 0.75"/>
+            </material>
+        </visual>
+    </link>
+
+    <link name="camera_mount_bracket_2">
+        <visual>
+            <geometry>
+                <box size="0.035 0.003 0.028"/>
+            </geometry>
+            <material name="acrylic_gray"/>
+        </visual>
+    </link>
+
+    <joint name="camera_mount_bracket_joint" type="fixed">
+        <parent link="camera_mount_bracket_1"/>
+        <child link="camera_mount_bracket_2"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.010 -0.0025"/>
+    </joint>
+
+    <joint name="camera_mount_to_leddar_sensor_joint" type="fixed">
+        <parent link="leddar_sensor"/>
+        <child link="camera_mount_bracket_1"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.02045 0.0595"/>
+    </joint>
+
+    <link name="camera_board">
+        <visual>
+            <geometry>
+                <box size="0.025 0.001 0.024"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+    </link>
+
+    <link name="camera_lense">
+        <visual>
+            <geometry>
+                <cylinder length="0.017" radius="0.007"/>
+            </geometry>
+            <material name="rubber"/>
+        </visual>
+    </link>
+
+    <joint name="camera_board_to_lense_joint" type="fixed">
+        <parent link="camera_board"/>
+        <child link="camera_lense"/>
+        <origin rpy="-1.5708 0.0 0.0" xyz="0.0 0.009 -0.0035"/>
+    </joint>
+
+    <joint name="camera_to_bracket_joint" type="fixed">
+        <parent link="camera_mount_bracket_2"/>
+        <child link="camera_board"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.002 0.0"/>
+    </joint>
+
+    <link name="imu">
+        <visual>
+            <geometry>
+                <box size="0.0203 0.0267 0.002"/>
+            </geometry>
+            <material name="pcb_blue">
+                <color rgba="0.0 0.0 0.5 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="imu_to_top_tail_link_joint" type="fixed">
+        <parent link="top_tail_link"/>
+        <child link="imu"/>
+        <origin rpy="0.0 0.0 -1.5708" xyz="0.0427 0.0 0.025"/>
+    </joint>
+
+    <link name="imu_left_standoff">
+        <visual>
+            <geometry>
+                <cylinder length="0.020" radius=".0025"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+    </link>
+
+    <joint name="imu_left_standoff_joint" type="fixed">
+        <parent link="imu"/>
+        <child link="imu_left_standoff"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0076 0.0108 -0.011"/>
+    </joint>
+
+    <link name="imu_right_standoff">
+        <visual>
+            <geometry>
+                <cylinder length="0.020" radius=".0025"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+    </link>
+
+    <joint name="imu_right_standoff_joint" type="fixed">
+        <parent link="imu"/>
+        <child link="imu_right_standoff"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.0076 0.0108 -0.011"/>
+    </joint>
+
+    <link name="compute_complex">
+        <visual>
+            <geometry>
+                <box size="0.085 0.056 0.033"/>
+            </geometry>
+            <material name="pcb_green">
+                <color rgba="0.0 0.5 0.0 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="compute_to_tail_base_plate" type="fixed">
+        <parent link="tail_base_plate"/>
+        <child link="compute_complex"/>
+        <origin rpy="0.0 0.0 -1.5708" xyz="0.0 0.0085 0.018"/>
+    </joint>
+
+    <link name="battery">
+        <visual>
+            <geometry>
+                <box size="0.075 0.032 0.032"/>
+            </geometry>
+            <material name="battery_yellow">
+                <color rgba="0.976 0.729 0.086 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="battery_to_tail_joint" type="fixed">
+        <parent link="tail_link"/>
+        <child link="battery"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.020"/>
+    </joint>
+
+</robot>
